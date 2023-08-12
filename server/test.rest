@@ -1,0 +1,37 @@
+### /register
+
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+  "email": "test",
+  "password": "test"
+}
+
+### Store the token from the response
+# token = response.body.token
+
+### /home
+
+GET http://localhost:3000/home
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:3000/logout
+
+###
+
+POST http://localhost:3000/login 
+
+{
+  "email": "a",
+  "password": "a"
+}
+
+### Store the token from the response
+# token = response.body.token
+
+
+
+
+
