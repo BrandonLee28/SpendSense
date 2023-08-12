@@ -21,15 +21,25 @@ GET http://localhost:3000/logout
 
 ###
 
-POST http://localhost:3000/login 
+POST http://localhost:3000/login
+Content-Type: application/json
 
 {
-  "email": "a",
-  "password": "a"
+  "email": "brandon28davidson@gmail.com",
+  "password": "123"
 }
 
-### Store the token from the response
+###
 # token = response.body.token
+
+# Step 2: Create a budget using the obtained token
+POST http://localhost:3000/budget
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyYW5kb24yOGRhdmlkc29uQGdtYWlsLmNvbSIsImlhdCI6MTY5MTgwNzA0NH0.5U7yDcIzgiWaW4z9AteRKlGfglSFQgtGfmDL4AyR0Ss
+
+{
+  "name": "test"
+}
 
 
 

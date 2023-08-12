@@ -101,7 +101,7 @@ app.post('/login', async (req,res) => {
         res.cookie('token', accessToken, {
             httpOnly: true, 
             maxAge: 1200000,
-            secure: false, 
+            secure: true, 
             sameSite: 'None',
         });
         return res.status(200).json({message: 'User Logged in'})
