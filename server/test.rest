@@ -14,7 +14,7 @@ Content-Type: application/json
 ### /home
 
 GET http://localhost:3000/home
-Authorization: Bearer {{token}}
+
 
 ###
 GET http://localhost:3000/logout
@@ -33,15 +33,21 @@ Content-Type: application/json
 # token = response.body.token
 
 # Step 2: Create a budget using the obtained token
-POST http://localhost:3000/budget
+GET http://localhost:3000/budget/64d7e0d17802773c9243f30d
 Content-Type: application/json
-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyYW5kb24yOGRhdmlkc29uQGdtYWlsLmNvbSIsImlhdCI6MTY5MTgwNzA0NH0.5U7yDcIzgiWaW4z9AteRKlGfglSFQgtGfmDL4AyR0Ss
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyYW5kb24yOGRhdmlkc29uQGdtYWlsLmNvbSIsImlhdCI6MTY5MTg3OTM2Nn0.gaJAENyHeFqjMlFYvbray4A8oCWw5vDcfIeOnEZXTBQ
+
+
+###
+POST http://localhost:3000/budget/64d7e0d17802773c9243f30d
+Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyYW5kb24yOGRhdmlkc29uQGdtYWlsLmNvbSIsImlhdCI6MTY5MTg5NTU2NX0.McSc4mAEbRK3oSylS7WZbp_F_0VFRqUgVlSy-lNnkwU
 
 {
-  "name": "test"
+  "name":"b",
+  "category":"Income",
+  "amount":"1"
 }
-
-
 
 
 

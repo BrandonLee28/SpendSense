@@ -73,7 +73,12 @@ app.get('/home', authenticateToken, async (req,res) => {
                 email: req.user.email
             },
         });
-        return res.status(202).json({id:user.id, email:user.email,role:user.role})
+        const budgets = await prisma.budget.findMany({
+            where: {
+                User: user,
+            }
+        })
+        return res.status(202).json({id:user.id, email:user.email,role:user.role, budgets:budgets})
     }catch(err){
         return res.json(err)
     }
@@ -114,6 +119,28 @@ app.post('/login', async (req,res) => {
 
 })
 
+app.post('/budget/:id', authenticateToken, async (req,res) => {
+    try {
+        findUser = await prisma.user.findFirst({where: {
+            userId: req.user.id
+        }})
+        findBudget = await prisma.budget.findFirst({where: {
+            id: req.params.id
+        }})
+        transaction = await prisma.transaction.create({data: {
+            name: req.body.name,
+            category: req.body.category,
+            amount: req.body.amount,
+            Budget: {
+                connect: { id: findBudget.id}
+            }
+        }})
+        return res.status(201).json({ message: 'Transaction created successfully', transaction });
+    }catch(err){
+        console.error(err)
+    }
+})
+
 app.post('/budget', authenticateToken, async (req, res) => {
     try {
         findUser = await prisma.user.findFirst({where:
@@ -133,6 +160,54 @@ app.post('/budget', authenticateToken, async (req, res) => {
         return res.status(500).json({ error: 'Failed to create budget' });
     }
 })
+
+
+app.get('/budget/:id', authenticateToken, async (req,res) => {
+    try{
+        const findUser = await prisma.user.findFirst({where:
+            {
+                email: req.user.email
+            }})  
+        const Budget = await prisma.budget.findFirst({where: {
+            id: req.params.id,
+            userId: findUser.id
+        }});
+        const Transactions = await prisma.transaction.findMany({where: {
+            budgetId: Budget.id
+        }});
+            
+        return res.status(200).json({
+            id: findUser.id, 
+            email: findUser.email, 
+            role: findUser.role, 
+            budget: {
+                budget: Budget,
+                transactions: Transactions
+            }
+        }
+        );
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.delete('/budget/:budid/transaction/:transid', authenticateToken, async (req,res) => {
+    try{
+        findBudget = await prisma.budget.findFirst({where: {
+            id: req.params.budid
+        }})
+
+        await prisma.transaction.delete({where: {
+            id: req.params.transid,
+            budgetId: findBudget.id
+        }})
+        return res.status(200).json({message: 'Transaction deleted'})
+    }catch(err){
+        console.error(err)
+    }
+})
+
 
 const server = app.listen(3000, () => {
     console.log('Server is running on port 3000');

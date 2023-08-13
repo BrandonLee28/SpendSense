@@ -5,7 +5,118 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const navgiate = useNavigate();
+  const [budgetName, setBudgetName] = useState("");
   const [responseData, setResponseData] = useState({});
+  const [budgetModalVisible, setBudgetModalVisible] = useState(false);
+
+  const handleBudgetAdd = () => {
+    const token = Cookies.get("token");
+    axios.post("http://localhost:3000/budget", {
+      name: budgetName,
+    });
+    toggleBudgetModal();
+    window.location.reload(false);
+  };
+
+  const generateBudgetModal = () => {
+    return (
+      <form className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40">
+        <div
+          tabIndex="-1"
+          aria-hidden="true"
+          className="flex items-center justify-center h-full">
+          <div className="relative w-full max-w-2xl max-h-full">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Add Budget
+                </h3>
+                <button
+                  onClick={toggleBudgetModal}
+                  type="button"
+                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14">
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+              <div className="p-6 space-y-6 flex flex-col justify-start mx-auto">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Budget Name
+                  </label>
+                  <input
+                    onChange={(e) => setBudgetName(e.target.value)}
+                    value={budgetName}
+                    type="text"
+                    id="name"
+                    className="shadow-sm bg-gray-50 border w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+                    placeholder=""
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button
+                  onClick={() => handleBudgetAdd()}
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                  Add
+                </button>
+                <button
+                  onClick={toggleBudgetModal}
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    );
+  };
+
+  const toggleBudgetModal = () => {
+    setBudgetModalVisible(!budgetModalVisible);
+  };
+
+  const generateBudgetDivs = () => {
+    if (!responseData.budgets) {
+      return null;
+    }
+
+    return responseData.budgets.map((budgetItem) => (
+      <a
+        href={`/budgets/${budgetItem.id}`}
+        key={budgetItem.id}
+        className="flex flex-col justify-center items-center rounded-lg h-32 md:h-64 bg-neutral-100 drop-shadow-lg">
+        <span
+          href
+          className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+          {budgetItem.name}
+        </span>
+      </a>
+    ));
+  };
+
   useEffect(() => {
     const token = Cookies.get("token");
 
@@ -51,9 +162,11 @@ const Home = () => {
       </nav>
       <main className="justify-between mx-auto h-auto pt-20 max-w-screen-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          {generateBudgetDivs()}
           <button
-            id="AddBudgetModalButton"
-            data-modal-toggle="AddBudgetModal"
+            onClick={() => toggleBudgetModal()}
+            data-modal-target="defaultModal"
+            data-modal-toggle="defaultModal"
             className="flex flex-col justify-center items-center border-2 border-dashed border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
               Add Budget
@@ -76,130 +189,7 @@ const Home = () => {
           </button>
         </div>
       </main>
-      <div
-        id="AddBudgetModal"
-        tabIndex="-1"
-        aria-hidden="true"
-        className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
-        <div className="relative p-4 w-full max-w-2xl h-full md:h-auto">
-          <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-            <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Add Product
-              </h3>
-              <button
-                type="button"
-                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                data-modal-toggle="AddBudgetModal">
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"></path>
-                </svg>
-                <span className="sr-only">Close modal</span>
-              </button>
-            </div>
-            <form action="#">
-              <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Type product name"
-                    required=""
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="brand"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Brand
-                  </label>
-                  <input
-                    type="text"
-                    name="brand"
-                    id="brand"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Product brand"
-                    required=""
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="price"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    id="price"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="$2999"
-                    required=""
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="category"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Category
-                  </label>
-                  <select
-                    id="category"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <option defaultValue="">Select category</option>
-                    <option value="TV">TV/Monitors</option>
-                    <option value="PC">PC</option>
-                    <option value="GA">Gaming/Console</option>
-                    <option value="PH">Phones</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="description"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows="4"
-                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Write product description here"></textarea>
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                <svg
-                  className="mr-1 -ml-1 w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                    clipRule="evenodd"></path>
-                </svg>
-                Add new product
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+      {budgetModalVisible && generateBudgetModal()}
     </>
   );
 };
