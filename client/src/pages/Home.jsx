@@ -9,12 +9,11 @@ const Home = () => {
   const [responseData, setResponseData] = useState({});
   const [budgetModalVisible, setBudgetModalVisible] = useState(false);
 
-  const handleBudgetAdd = () => {
+  const handleBudgetAdd = async () => {
     const token = Cookies.get("token");
-    axios.post("http://localhost:3000/budget", {
+    await axios.post("http://localhost:3000/budget", {
       name: budgetName,
     });
-    toggleBudgetModal();
     window.location.reload(false);
   };
 
@@ -130,7 +129,6 @@ const Home = () => {
       .then((response) => {
         // Handle the response
         setResponseData(response.data);
-        console.log("Response:", response.data);
       })
       .catch((error) => {
         // Handle errors

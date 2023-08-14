@@ -16,7 +16,9 @@ const Budgets = () => {
   const [transactionCategory, setTransactionCategory] = useState("");
   const [transactionAmount, setTransactionAmount] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [transactionSelector, setTransactionSelector] = useState("")
+  const [transactionSelector, setTransactionSelector] = useState("");
+  const [BudgetEditModal, setBudgetEditModal] = useState(false);
+  const [editBudgetName, setEditBudgetName] = useState("");
 
   const deleteTransaction = async (id) => {
     const targetTransaction = responseData.budget.transactions.find(
@@ -28,13 +30,11 @@ const Budgets = () => {
       url: `http://localhost:3000/budget/${budgetId}/transaction/${transactionSelector}`,
       headers: {
         Authorization: `Bearer ${token}`,
-      }
-    })
+      },
+    });
     toggleEditModal();
     window.location.reload(false);
-
-
-  }
+  };
 
   const handleAddTransaction = () => {
     const token = Cookies.get("token");
@@ -62,160 +62,278 @@ const Budgets = () => {
       });
   };
 
-  const generateEditModal = (id) => {
+  const generateBudgetEditModal = () => {
+    const token = Cookies.get("token");
 
+    return (
+      <form
+        id="AddTransaction"
+        className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40">
+        <div
+          tabIndex="-1"
+          aria-hidden="true"
+          className="flex items-center justify-center h-full">
+          <div className="relative w-full max-w-2xl max-h-full">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Edit Budget
+                </h3>
+                <button
+                  onClick={toggleEditBudgetModal}
+                  type="button"
+                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14">
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+              <div className="p-6 space-y-6 flex flex-col justify-start mx-auto">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Budget Name
+                  </label>
+                  <input
+                    onChange={(e) => setEditBudgetName(e.target.value)}
+                    placeholder={responseData.budget.budget.name}
+                    type="text"
+                    id="name"
+                    className="shadow-sm bg-gray-50 border w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+                    required
+                    value={editBudgetName}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                  Edit
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await axios.delete(
+                        `http://localhost:3000/budget/${budgetId}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      );
+                      toggleEditBudgetModal();
+                      navigate("/home");
+                    } catch (error) {
+                      console.error(
+                        "An error occurred while deleting the budget:",
+                        error
+                      );
+                    }
+                  }}
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    );
+  };
+
+  const generateEditModal = (id) => {
     const targetTransaction = responseData.budget.transactions.find(
       (transaction) => transaction.id === transactionSelector
     );
-
-    return(
+    const token = Cookies.get("token");
+    setTransactionAmount(targetTransaction.amount)
+    setTransactionCategory(targetTransaction.category)
+    setTransactionName(targetTransaction.name)
+    return (
       <form
-          id="AddTransaction"
-          className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40">
-          <div
-            tabIndex="-1"
-            aria-hidden="true"
-            className="flex items-center justify-center h-full">
-            <div className="relative w-full max-w-2xl max-h-full">
-              <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Edit Transaction
-                  </h3>
+        id="AddTransaction"
+        className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40">
+        <div
+          tabIndex="-1"
+          aria-hidden="true"
+          className="flex items-center justify-center h-full">
+          <div className="relative w-full max-w-2xl max-h-full">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Edit Transaction
+                </h3>
+                <button
+                  onClick={toggleEditModal}
+                  type="button"
+                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14">
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+              <div className="p-6 space-y-6 flex flex-col justify-start mx-auto">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Transaction Name
+                  </label>
+                  <input
+                    onChange={(e) => setTransactionName(e.target.value)}
+                    value={transactionName}
+                    type="text"
+                    id="name"
+                    className="shadow-sm bg-gray-50 border w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+                    required
+                  />
+                </div>
+                <div className="mb-6">
                   <button
-                    onClick={toggleEditModal}
-                    type="button"
-                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    id="dropdownDefaultButton"
+                    data-dropdown-toggle="dropdown"
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3.5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    type="button">
+                    {transactionCategory || 'Category'}
                     <svg
-                      className="w-3 h-3"
+                      className="w-2.5 h-2.5 ml-2.5"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
-                      viewBox="0 0 14 14">
+                      viewBox="0 0 10 6">
                       <path
                         stroke="currentColor"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                        d="m1 1 4 4 4-4"
                       />
                     </svg>
-                    <span className="sr-only">Close modal</span>
                   </button>
-                </div>
-                <div className="p-6 space-y-6 flex flex-col justify-start mx-auto">
-                  <div>
+
+                  <div
+                    id="dropdown"
+                    className={`z-10 ${
+                      dropdownVisible ? "" : "hidden"
+                    } bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700`}>
+                    <ul
+                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                      aria-labelledby="dropdownDefaultButton">
+                      <li>
+                        <a
+                          onClick={() => {
+                            setTransactionCategory("Income");
+                            toggleTransactionDropdown();
+                          }}
+                          href="#"
+                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                          Income
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          onClick={() => {
+                            setTransactionCategory("Expenses");
+                            toggleTransactionDropdown();
+                          }}
+                          href="#"
+                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                          Expenses
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="mt-6">
                     <label
                       htmlFor="name"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                      Transaction Name
+                      Transaction Amount
                     </label>
                     <input
-                      onChange={(e) => setTransactionName(e.target.value)}
-                      value={transactionName}
+                      onChange={(e) => setTransactionAmount(e.target.value)}
+                      value={transactionAmount}
                       type="text"
                       id="name"
-                      className="shadow-sm bg-gray-50 border w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-                      placeholder={targetTransaction.name}
+                      className="shadow-sm w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
                       required
                     />
                   </div>
-                  <div className="mb-6">
-                    <button
-
-                      id="dropdownDefaultButton"
-                      data-dropdown-toggle="dropdown"
-                      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3.5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button">
-                      {transactionCategory || targetTransaction.category}
-                      <svg
-                        className="w-2.5 h-2.5 ml-2.5"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 10 6">
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="m1 1 4 4 4-4"
-                        />
-                      </svg>
-                    </button>
-
-                    <div
-                      id="dropdown"
-                      className={`z-10 ${
-                        dropdownVisible ? "" : "hidden"
-                      } bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700`}>
-                      <ul
-                        className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                        aria-labelledby="dropdownDefaultButton">
-                        <li>
-                          <a
-                            onClick={() => {
-                              setTransactionCategory("Income");
-                              toggleTransactionDropdown();
-                            }}
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                            Income
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            onClick={() => {
-                              setTransactionCategory("Expenses");
-                              toggleTransactionDropdown();
-                            }}
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                            Expenses
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="mt-6">
-                      <label
-                        htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Transaction Amount
-                      </label>
-                      <input
-                        onChange={(e) => setTransactionAmount(e.target.value)}
-                        value={transactionAmount}
-                        type="text"
-                        id="name"
-                        className="shadow-sm w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-                        placeholder={targetTransaction.amount}
-                        required
-                      />
-                    </div>
-                  </div>
                 </div>
+              </div>
 
-                <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-                  <button
-                    data-modal-hide="AddTransaction"
-                    type="button"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteTransaction(0)}
-                    data-modal-hide="AddTransaction"
-                    type="button"
-                    className="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
-                    Delete
-                  </button>
-                </div>
+              <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button
+                  onClick={async () => {
+                    try {
+                      await axios.patch(
+                        `/budget/${budgetId}/transaction/${transactionSelector}`,
+                        {
+                          name: transactionName, // Update with the new name
+                          category: transactionCategory, // Update with the new category
+                          amount: transactionAmount, // Update with the new amount
+                        },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      );
+
+                      toggleEditBudgetModal();
+                      navigate(`/budgets/${budgetId}`)
+                    } catch (error) {
+                      console.error("Error editing transaction:", error);
+                    }
+                  }}
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteTransaction(0)}
+                  data-modal-hide="AddTransaction"
+                  type="button"
+                  className="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                  Delete
+                </button>
               </div>
             </div>
           </div>
-        </form>
-    )
-  }
+        </div>
+      </form>
+    );
+  };
 
   const toggleTransactionDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -226,9 +344,13 @@ const Budgets = () => {
   };
 
   const toggleEditModal = (id) => {
-    setEditModalVisible(!editModalVisible)
-    setTransactionSelector(id)
-  }
+    setEditModalVisible(!editModalVisible);
+    setTransactionSelector(id);
+  };
+
+  const toggleEditBudgetModal = () => {
+    setBudgetEditModal(!BudgetEditModal);
+  };
   // ... (generateTransactionDivs function and other code) ...
   const Profit = () => {
     if (totalProfit > 0) {
@@ -301,7 +423,7 @@ const Budgets = () => {
     }
 
     const transactions = responseData.budget.transactions;
-    
+
     return transactions.map((TransactionItem) => (
       <tr
         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
@@ -335,20 +457,32 @@ const Budgets = () => {
             </span>
           </a>
           <div className="flex items-center">
-            <a className="mr-6 text-sm  text-gray-500 dark:text-white hover:underline">
+            <a
+              href="/home"
+              className="mr-6 text-sm text-blue-600 dark:text-white hover:underline">
+              Home
+            </a>
+            <a className="mr-6 text-sm text-gray-500 dark:text-white hover:underline">
               {responseData.email}
             </a>
             <a
               href="/logout"
-              className="text-sm  text-blue-600 dark:text-blue-500 hover:underline">
+              className="text-sm text-blue-600 dark:text-blue-500 hover:underline">
               Logout
             </a>
+            {/* Add the Home button here */}
           </div>
         </div>
       </nav>
       {responseData.budget ? (
-        <h1 className="text-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-          {responseData.budget.budget.name}
+        <h1 className=" text-center text-2xl font-semibold rounded-lg whitespace-nowrap dark:text-white">
+          <p>{responseData.budget.budget.name}</p>{" "}
+          <button
+            onClick={() => toggleEditBudgetModal()}
+            type="button"
+            class="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+            Edit
+          </button>
         </h1>
       ) : (
         console.log("Loading")
@@ -569,6 +703,7 @@ const Budgets = () => {
         </form>
       )}
       {editModalVisible && generateEditModal()}
+      {BudgetEditModal && generateBudgetEditModal()}
     </>
   );
 };

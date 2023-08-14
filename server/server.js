@@ -208,9 +208,49 @@ app.delete('/budget/:budid/transaction/:transid', authenticateToken, async (req,
     }
 })
 
+app.delete('/budget/:id', authenticateToken, async (req,res) => {
+    try{
+        await prisma.budget.delete({ where: {
+            id: req.params.id
+        }})
+        return res.status(200).json({message: 'Budget deleted'})
+    }catch(err){
+        console.error(err)
+    }
+})
 
 const server = app.listen(3000, () => {
     console.log('Server is running on port 3000');
+});
+
+app.patch('/budget/:budid/transaction/:transid', authenticateToken, async (req, res) => {
+    try {
+        const findBudget = await prisma.budget.findFirst({
+            where: {
+                id: req.params.budid,
+            },
+        });
+
+        if (!findBudget) {
+            return res.status(404).json({ message: 'Budget not found' });
+        }
+
+        await prisma.transaction.update({
+            where: {
+                id: req.params.transid,
+            },
+            data: {
+                name: req.body.name,        
+                category: req.body.category, 
+                amount: req.body.amount,     
+            },
+        });
+
+        return res.status(200).json({ message: 'Transaction updated' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 // Close the Prisma connection when the server is closed
