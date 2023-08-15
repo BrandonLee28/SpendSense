@@ -219,6 +219,25 @@ app.delete('/budget/:id', authenticateToken, async (req,res) => {
     }
 })
 
+app.patch('/budget/:id', authenticateToken, async (req,res) => {
+    try{
+        const findBudget = await prisma.budget.update({
+            where: {
+                id: req.params.id,
+            },
+            data: {
+                name: req.body.name
+            }
+        });
+        if (!findBudget) {
+            return res.status(404).json({ message: 'Budget not found' });
+        }
+        return res.status(200).json({message: 'Budget name updated'})
+    }catch(err){
+        console.error(err)
+    }
+})
+
 const server = app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });

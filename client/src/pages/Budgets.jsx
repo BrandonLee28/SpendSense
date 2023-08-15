@@ -121,6 +121,26 @@ const Budgets = () => {
 
               <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
                 <button
+                  onClick={async () => {
+                    try {
+                      const response = await axios.patch(
+                        `http://localhost:3000/budget/${budgetId}`,
+                        {
+                          name: editBudgetName,
+                        },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      );
+                      // Handle the response or perform any necessary actions
+                      window.location.reload(false);
+                    } catch (error) {
+                      // Handle errors
+                      console.error(error);
+                    }
+                  }}
                   data-modal-hide="AddTransaction"
                   type="button"
                   className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -129,7 +149,7 @@ const Budgets = () => {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.delete(
+                      const response = await axios.delete(
                         `http://localhost:3000/budget/${budgetId}`,
                         {
                           headers: {
@@ -137,13 +157,10 @@ const Budgets = () => {
                           },
                         }
                       );
-                      toggleEditBudgetModal();
-                      navigate("/home");
+                      navigate(`/home`);
                     } catch (error) {
-                      console.error(
-                        "An error occurred while deleting the budget:",
-                        error
-                      );
+                      // Handle errors
+                      console.error(error);
                     }
                   }}
                   data-modal-hide="AddTransaction"
@@ -164,9 +181,7 @@ const Budgets = () => {
       (transaction) => transaction.id === transactionSelector
     );
     const token = Cookies.get("token");
-    setTransactionAmount(targetTransaction.amount)
-    setTransactionCategory(targetTransaction.category)
-    setTransactionName(targetTransaction.name)
+
     return (
       <form
         id="AddTransaction"
@@ -216,6 +231,7 @@ const Budgets = () => {
                     id="name"
                     className="shadow-sm bg-gray-50 border w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
                     required
+                    placeholder={targetTransaction.name}
                   />
                 </div>
                 <div className="mb-6">
@@ -224,7 +240,7 @@ const Budgets = () => {
                     data-dropdown-toggle="dropdown"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3.5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     type="button">
-                    {transactionCategory || 'Category'}
+                    {transactionCategory || "Category"}
                     <svg
                       className="w-2.5 h-2.5 ml-2.5"
                       aria-hidden="true"
@@ -255,7 +271,6 @@ const Budgets = () => {
                             setTransactionCategory("Income");
                             toggleTransactionDropdown();
                           }}
-                          href="#"
                           className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                           Income
                         </a>
@@ -266,7 +281,6 @@ const Budgets = () => {
                             setTransactionCategory("Expenses");
                             toggleTransactionDropdown();
                           }}
-                          href="#"
                           className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                           Expenses
                         </a>
@@ -286,6 +300,7 @@ const Budgets = () => {
                       id="name"
                       className="shadow-sm w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
                       required
+                      placeholder={targetTransaction.amount}
                     />
                   </div>
                 </div>
@@ -310,7 +325,7 @@ const Budgets = () => {
                       );
 
                       toggleEditBudgetModal();
-                      navigate(`/budgets/${budgetId}`)
+                      navigate(`/budgets/${budgetId}`);
                     } catch (error) {
                       console.error("Error editing transaction:", error);
                     }
