@@ -11,7 +11,7 @@ const Home = () => {
 
   const handleBudgetAdd = async () => {
     const token = Cookies.get("token");
-    await axios.post("http://localhost:3000/budget", {
+    await axios.post("/budget", {
       name: budgetName,
     });
     window.location.reload(false);
@@ -121,7 +121,7 @@ const Home = () => {
 
     axios({
       method: "get",
-      url: "http://localhost:3000/home",
+      url: "/home",
       headers: {
         Authorization: `Bearer ${token}`,
       },

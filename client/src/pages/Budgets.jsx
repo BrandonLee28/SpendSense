@@ -27,7 +27,7 @@ const Budgets = () => {
     const token = Cookies.get("token");
     await axios({
       method: "delete",
-      url: `http://localhost:3000/budget/${budgetId}/transaction/${transactionSelector}`,
+      url: `/budget/${budgetId}/transaction/${transactionSelector}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -46,7 +46,7 @@ const Budgets = () => {
     console.log(transactionData);
     axios({
       method: "post",
-      url: `http://localhost:3000/budget/${budgetId}`,
+      url: `/budget/${budgetId}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -124,7 +124,7 @@ const Budgets = () => {
                   onClick={async () => {
                     try {
                       const response = await axios.patch(
-                        `http://localhost:3000/budget/${budgetId}`,
+                        `/budget/${budgetId}`,
                         {
                           name: editBudgetName,
                         },
@@ -150,7 +150,7 @@ const Budgets = () => {
                   onClick={async () => {
                     try {
                       const response = await axios.delete(
-                        `http://localhost:3000/budget/${budgetId}`,
+                        `/budget/${budgetId}`,
                         {
                           headers: {
                             Authorization: `Bearer ${token}`,
@@ -395,7 +395,7 @@ const Budgets = () => {
 
     axios({
       method: "get",
-      url: `http://localhost:3000/budget/${budgetId}`,
+      url: `/budget/${budgetId}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
