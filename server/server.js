@@ -94,30 +94,29 @@ app.get('/logout',authenticateToken, async (req,res) => {
 })
 
 
-app.post('/login', async (req,res) => {
-    try{
-    const {email,password} = req.body;
-    const user = await prisma.user.findFirst({where: {
-        email: email,
-    }})
-    const hashedPassword = user.password
-    await bcrypt.compare(password, hashedPassword, (err,result) => {
-        const accessToken = jwt.sign({'email':user.email, 'id':user._id},process.env.SECRET_TOKEN)
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await prisma.user.findFirst({ where: { email: email } });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+        const accessToken = jwt.sign({ 'email': user.email, 'id': user._id }, process.env.SECRET_TOKEN);
         res.cookie('token', accessToken, {
-            httpOnly: true, 
+            httpOnly: true,
             maxAge: 1200000,
-            secure: true, 
+            secure: true,
             sameSite: 'None',
         });
-        return res.status(200).json({message: 'User Logged in'})
-    })
-
-    }catch(err){
-        return res.json(err)
-
+        return res.status(200).json({ message: 'User Logged in' });
+    } catch (err) {
+        return res.status(500).json(err);
     }
-
-})
+});
 
 app.post('/budget/:id', authenticateToken, async (req,res) => {
     try {
